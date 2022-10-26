@@ -147,6 +147,7 @@ void editrec(){  //edit the rec based in airline an dthe time//
 }
 
 void findmed(){//need to write a prog that return false when the returned rows are null//eg:use count(*)//
+//ask user if it wants to access a specific rec or a grp of rec
     string dummy;
     MYSQL* conn;
     MYSQL* conn2;
@@ -158,26 +159,37 @@ void findmed(){//need to write a prog that return false when the returned rows a
     if(conn){
 
         string name;
-        int quantity;
-        cout << "Enter Name : ";
-        cin >> name;
-        cout << "Enter Quantity : ";
-        cin >> quantity;
+        int time;
+        MYSQL_ROW row;
+        cout << "Enter time : ";//for single rec
+        cin >> time;
 
 
         int qstate1 = 0;
 
         stringstream ss1;
-      //  ss1 << "UPDATE inventory SET quantity = quantity - " << quantity << " WHERE name = '" << name << "'";
+        ss1 << "SELECT * FROM atm where time="<<time<<" ";
 
         string query1 = ss1.str();
 
-        const char* q1 = query1.c_str();
+         const char* q1 = query1.c_str();
         qstate1 = mysql_query(conn, q1);
         if(qstate1 == 0){
-            cout << "Record Updated..." << endl;
-        }else{
-            cout << "Insert Error" << mysql_error(conn) << endl;
+            res = mysql_store_result(conn);
+            row=mysql_fetch_row(res);
+            if(row==NULL)
+            {
+                cout<<"Rec doesn't exsist"<<endl;
+            }
+            else{
+                while(row){
+                        cout << row[0] <<"\t | \t" << row[1] <<"\t | \t" << row[2] <<"\t | \t" << row[3] <<"\t | \t"<< row[4]  << endl << endl;
+                        row= mysql_fetch_row(res);
+                    }
+                }
+            }
+        else{
+            cout << " Error:" << mysql_error(conn) << endl;
         }
 
     }
@@ -203,7 +215,7 @@ void view(){
             res = mysql_store_result(conn);
 
             while(row = mysql_fetch_row(res)){
-                cout << row[0] <<"\t | \t" << row[1] <<"\t | \t" << row[2] <<"\t | \t" << row[3] << endl << endl;
+                cout << row[0] <<"\t | \t" << row[1] <<"\t | \t" << row[2] <<"\t | \t" << row[3] <<"\t | \t"<< row[4]  << endl << endl;
              }
         }
     }
