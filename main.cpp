@@ -3,7 +3,7 @@
 #include<mysql.h>
 #include <sstream>
 #include<stdio.h>
-#define ipadd "192.168.162.48"
+#define ipadd "192.168.32.65"
 using namespace std;
 
 bool dbconn();
@@ -55,8 +55,8 @@ void addrec(){
     conn = mysql_init(0);
     conn = mysql_real_connect(conn, ipadd, "ronak", "ronak", "atm", 0, NULL, 0);
     if(conn){
-        int time,qstate = 0, quantity;
-        string name, location;
+        int qstate = 0, quantity;
+        string name, location,time;
 
         cout << "Enter time : ";
         cin >> time;
@@ -67,8 +67,14 @@ void addrec(){
         cin >> operation;
         //check if the entered value is A or D
         string airline;
+        airlinelabel:
         cout << "Enter the airline : ";
         cin >> airline;
+        if(airline!="A" && airline!="D")
+        {
+            cout<<"\nInvalid input!"<<endl;
+            goto airlinelabel;
+        }
         string aircraft;
         cout << "Enter the type aircraft : ";
         //add the options that gives ooptions for type of aircraft//
@@ -101,37 +107,49 @@ void addrec(){
 
 }
 
-void editrec(){  //edit the rec based in airline an dthe time//
+void editrec(){  //edit the rec based in airline and the time//
     string dummy;
     MYSQL* conn;
+    MYSQL_ROW row;
     conn = mysql_init(0);
+     MYSQL_RES* res;
     conn = mysql_real_connect(conn, ipadd, "ronak", "ronak", "atm", 0, NULL, 0);
     if(conn){
-        int qstate = 0;
-        string name;
-        int time,prevtime;
+        int qstate = 0;const char* q;
+        string name, time,prevtime,query;stringstream ss;
+        editreclabel:
         cout << "Enter Name of airline: ";
         cin >> name;
         cout << "Enter prevtime : ";
         cin >> prevtime;
         //check if the data exsist //
+        {
+            stringstream ss;
+            ss<<"select * from atm where time='"<<prevtime<<"' and airline='"<<name<<"'";
+            query = ss.str();
+            q=query.c_str();
+            qstate=mysql_query(conn, q);
+            MYSQL_RES* res= mysql_store_result(conn);
+            MYSQL_ROW row=mysql_fetch_row(res);
+            if(row==NULL)
+            {
+                cout<<"\nInput error!!"<<endl;
+                goto editreclabel;
+            }
+        }
         cout<<"Enter the new time:";
         cin>>time;
         //check if the time is possible//
-
-        stringstream ss;
-        ss << "UPDATE atm SET time =  " << time << " WHERE airline= '" << name << "' and time='"<<prevtime<<"'";
-
-        string query = ss.str();
-
-        const char* q = query.c_str();
+        ss << "UPDATE atm SET time = '" << time << "' WHERE airline='" << name << "' and time='"<<prevtime<<"'";
+        query = ss.str();
+        q = query.c_str();
         qstate = mysql_query(conn, q);
         if(qstate == 0){
             cout << "Record Updated..." << endl;
             cout << "Press B to go back";
             cin >> dummy;
         }else{
-            cout << "Insert Error" << mysql_error(conn) << endl;
+            cout << "Insert Error:" << mysql_error(conn) << endl;
             cout << "Press B to go back";
             cin >> dummy;
         }
@@ -209,17 +227,34 @@ void view(){
     conn = mysql_init(0);
     conn = mysql_real_connect(conn, ipadd, "ronak", "ronak", "atm", 0, NULL, 0);
     if(conn){
-        int qstate = mysql_query(conn, "SELECT time,operation, airline,aircraft,passengers FROM atm");
+        int qstate = mysql_query(conn, "SELECT time,operation,airline,aircraft,passengers FROM atm");
 
         if(!qstate){
             res = mysql_store_result(conn);
+            // Print column headers
+
+            MYSQL_FIELD *mysqlFields= mysql_fetch_fields(res);
+           int numFields = mysql_num_fields(res);
+            for(int jj=0; jj < numFields; jj++)
+            {
+                cout<<mysqlFields[jj].name;
+                cout<<"\t\t";
+            }
+            printf("\n");
+            // print query results
 
             while(row = mysql_fetch_row(res)){
-                cout << row[0] <<"\t | \t" << row[1] <<"\t | \t" << row[2] <<"\t | \t" << row[3] <<"\t | \t"<< row[4]  << endl << endl;
-             }
-        }
+               for(int ii=0; ii < numFields; ii++)
+               {
+                cout<<row[ii];  cout<<"          ";// Not NULL then print}printf("\n");
+                }
+                cout<<"\n";
+            }
     }
-
+    }
+    else{
+        cout<<"\n connection error"<<endl;
+    }
     cout << "Press B to go back";
     cin >> dummy;
 
