@@ -6,7 +6,7 @@
 #define ipadd "192.168.224.48"
 using namespace std;
 
-bool dbconn();
+
 void addrec();
 void editrec();
 void findmed();
