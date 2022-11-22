@@ -3,7 +3,7 @@
 #include<mysql.h>
 #include <sstream>
 #include<stdio.h>
-#define ipadd "192.168.32.65"
+#define ipadd "192.168.224.48"
 using namespace std;
 
 bool dbconn();
@@ -63,18 +63,20 @@ void addrec(){
 //check for opertaion//continue only if the op is possible//add a check condition
 
         char  operation;
+        airlinelabel:
         cout << "Arrival/Depature (A/D) : ";
         cin >> operation;
         //check if the entered value is A or D
-        string airline;
-        airlinelabel:
-        cout << "Enter the airline : ";
-        cin >> airline;
-        if(airline!="A" && airline!="D")
+        if(operation!='A' && operation!='D')
         {
             cout<<"\nInvalid input!"<<endl;
             goto airlinelabel;
         }
+        string airline;
+
+        cout << "Enter the airline : ";
+        cin >> airline;
+
         string aircraft;
         cout << "Enter the type aircraft : ";
         //add the options that gives ooptions for type of aircraft//
